@@ -1,22 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import fileinput
 import codecs
 import sys
 
-ignorelist = ('!', '-', '_', '(', ')', ',', '.', ':', ';', '"', '\'', '?', '#', '@', '$', '^', '&', '*', '+', '=', '{', '}', '[', ']', '\\', '|', '<', '>', '/', u'—')
-#ignorelist = ('!', '-', '_', '(', ')', ',', '.', ':', ';', '"', '\'', '?', '#', '@', '$', '^', '&', '*', '+', '=', '{', '}', '[', ']', '\\', '|', '<', '>', '/')
+ignorelist = ('!', '-', '_', '(', ')', ',', '.', ':', ';', '"', '\'', '?', '#', '@', '$', '^', '&', '*', '+', '=', '{', '}', '[', ']', '\\', '|', '<', '>', '/', u'—', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
 
 def print_token(token):
-#	print "before clean: "+ token
 	for punc in ignorelist:
 		token = token.replace(punc, ' ')
-#		print "after clean: "+token
 	for subtoken in token.strip().split():
 		print subtoken.upper(),
 	
 def main():
-#	for line in fileinput.input(openhook=fileinput.hook_encoded("utf-8")):
 	fhandle = codecs.open(sys.argv[1], "r", "utf-8")
 	line = fhandle.readline()
 	while line != "":
