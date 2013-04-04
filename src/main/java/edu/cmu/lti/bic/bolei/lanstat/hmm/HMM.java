@@ -1,8 +1,6 @@
 package edu.cmu.lti.bic.bolei.lanstat.hmm;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,11 +9,11 @@ import java.util.LinkedList;
 import java.util.Properties;
 
 public class HMM {
-	private static Properties config = new Properties();
+	private static final Properties CONFIG = new Properties();
 
 	static {
 		try {
-			config.load(HMM.class
+			CONFIG.load(HMM.class
 					.getResourceAsStream("/config/state.emission.properties"));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -28,11 +26,23 @@ public class HMM {
 	private int N; // number of states
 	private int V = 0; // size of vocabulary
 
+	private int startState;
+	private int finalState;
+
 	private ArrayList<String> vocabulary = new ArrayList<String>();
 
-	LinkedList<HashSet<String>> stateSymbols = new LinkedList<HashSet<String>>();
-
 	private HMM() {
+	}
+
+	public HMM(int startState, int finalState, double[][] transitionTable,
+			double[][] emissionTable, ArrayList<String> vocabulary) {
+		this.startState = startState;
+		this.finalState = finalState;
+		this.a = transitionTable;
+		this.b = emissionTable;
+		this.N = a.length;
+		this.V = vocabulary.size();
+		this.vocabulary = vocabulary;
 	}
 
 	public double[][] getTransitionTable() {
@@ -51,6 +61,14 @@ public class HMM {
 		return V;
 	}
 
+	public int getStartState() {
+		return startState;
+	}
+
+	public int getFinalState() {
+		return finalState;
+	}
+
 	/**
 	 * Assume each of the chars in the stream belongs to exactly one of the
 	 * states in the HMM. There's no char in the stream that does not belong to
@@ -61,72 +79,60 @@ public class HMM {
 	 * 
 	 * @return The start state of HMM
 	 */
-	public static HMM create1stNaiveHMM() {
-		BufferedReader brIn = null;
+	public static HMM create1stOrderSimpleHMM(String stream) {
+
 		HMM hmm = new HMM();
 
-		try {
-			brIn = new BufferedReader(new InputStreamReader(
-					HMM.class.getResourceAsStream(config
-							.getProperty("inputcorpus"))));
-			String stream = brIn.readLine();
+		LinkedList<HashSet<String>> stateSymbols = new LinkedList<HashSet<String>>();
 
-			// create states
+		// create states
+		hmm.N = Integer.parseInt(CONFIG.getProperty("stateNum"));
+		for (int i = 0; i < hmm.N; i++) {
+			HashSet<String> symbols = new HashSet<String>();
+			Collections.addAll(symbols, CONFIG.getProperty(i + "").split(","));
+			stateSymbols.add(symbols);
+			hmm.V += symbols.size();
+			hmm.vocabulary.addAll(symbols);
+		}
 
-			hmm.N = Integer.parseInt(config.getProperty("stateNum"));
-			for (int i = 0; i < hmm.N; i++) {
-				HashSet<String> symbols = new HashSet<String>();
-				Collections.addAll(symbols,
-						config.getProperty(i + "").split(","));
-				hmm.stateSymbols.add(symbols);
-				hmm.V += symbols.size();
-				hmm.vocabulary.addAll(symbols);
+		hmm.a = new double[hmm.N][hmm.N];
+		hmm.b = new double[hmm.N][hmm.V];
+
+		hmm.startState = findStateIndexOfSymbol(stateSymbols, stream.charAt(0)
+				+ "");
+
+		hmm.finalState = findStateIndexOfSymbol(stateSymbols,
+				stream.charAt(stream.length() - 1) + "");
+
+		// build transitions
+		for (int i = 0; i < stream.length(); i++) {
+			int currentState = findStateIndexOfSymbol(stateSymbols,
+					stream.charAt(i) + "");
+			if (currentState < 0) {
+				System.err
+						.println("no current state found for an emission symbol");
+				return null;
 			}
-
-			hmm.a = new double[hmm.N][hmm.N];
-			hmm.b = new double[hmm.N][hmm.V];
-
-			// build transitions
-			for (int i = 0; i < stream.length(); i++) {
-				int currentState = hmm.findStateIndexOfSymbol(stream.charAt(i)
-						+ "");
-				if (currentState < 0) {
+			if (i < stream.length() - 1) {
+				int nextState = findStateIndexOfSymbol(stateSymbols,
+						stream.charAt(i + 1) + "");
+				if (nextState < 0) {
 					System.err
-							.println("no current state found for an emission symbol");
+							.println("no next state found for an emission symbol");
 					return null;
 				}
-				if (i < stream.length() - 1) {
-					int nextState = hmm.findStateIndexOfSymbol(stream
-							.charAt(i + 1) + "");
-					if (nextState < 0) {
-						System.err
-								.println("no next state found for an emission symbol");
-						return null;
-					}
-					hmm.a[currentState][nextState] += 1;
-				}
-				hmm.b[currentState][hmm.vocabulary.indexOf(stream.charAt(i)
-						+ "")] += 1;
+				hmm.a[currentState][nextState] += 1;
 			}
-			updateProbability(hmm.a, hmm.N, hmm.N);
-			updateProbability(hmm.b, hmm.N, hmm.V);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (brIn != null) {
-				try {
-					brIn.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				brIn = null;
-			}
+			hmm.b[currentState][hmm.vocabulary.indexOf(stream.charAt(i) + "")] += 1;
 		}
+		updateProbability(hmm.a, hmm.N, hmm.N);
+		updateProbability(hmm.b, hmm.N, hmm.V);
+
 		return hmm;
 	}
 
-	public int findStateIndexOfSymbol(String symbol) {
+	private static int findStateIndexOfSymbol(
+			LinkedList<HashSet<String>> stateSymbols, String symbol) {
 		for (int i = 0; i < stateSymbols.size(); i++) {
 			if (stateSymbols.get(i).contains(symbol)) {
 				return i;
@@ -149,7 +155,7 @@ public class HMM {
 		}
 	}
 
-	private static String arrayToString(double[][] table, int rowNum) {
+	public static String arrayToString(double[][] table, int rowNum) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < rowNum; i++) {
 			sb.append(Arrays.toString(table[i]) + "\n");

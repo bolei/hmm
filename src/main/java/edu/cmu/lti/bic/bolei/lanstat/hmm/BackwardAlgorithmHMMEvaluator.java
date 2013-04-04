@@ -1,32 +1,32 @@
 package edu.cmu.lti.bic.bolei.lanstat.hmm;
 
-public class ForwardAlgorithmHMMEvaluator extends AbstractHMMEvaluator {
+public class BackwardAlgorithmHMMEvaluator extends AbstractHMMEvaluator {
 
-	ForwardAlgorithmHMMEvaluator(HMM hmm) {
+	BackwardAlgorithmHMMEvaluator(HMM hmm) {
 		super(hmm);
 	}
 
 	@Override
 	public double evaluate(String stream) {
+
 		// init table
 
 		int N = hmm.getN();
 		int T = stream.length();
 
 		table = new double[N][T + 1];
-		int startState = hmm.getStartState();
-		table[startState][0] = 1;
+		int finalState = hmm.getFinalState();
+		table[finalState][T] = 1;
 
-		// forward algorithm
+		// backward algorithm
 		int scaleupCount = 0;
-		for (int t = 1; t <= T; t++) {
-
+		for (int t = T - 1; t >= 0; t--) {
 			for (int i = 0; i < N; i++) {
 				for (int j = 0; j < N; j++) {
-					table[i][t] += table[j][t - 1]
-							* hmm.getTransitionTable()[j][i]
-							* hmm.getEmissionTable()[i][hmm
-									.getSymbolIndex(stream.charAt(t - 1) + "")];
+					table[i][t] += table[j][t + 1]
+							* hmm.getTransitionTable()[i][j]
+							* hmm.getEmissionTable()[j][hmm
+									.getSymbolIndex(stream.charAt(t) + "")];
 				}
 				if (table[i][t] < (1 / SCALEUP_FACTOR)) {
 					table[i][t] *= SCALEUP_FACTOR;
@@ -34,15 +34,17 @@ public class ForwardAlgorithmHMMEvaluator extends AbstractHMMEvaluator {
 				}
 			}
 		}
-		System.out.println(HMM.arrayToString(table, N));
+
 		// find the best to return
 		double result = Double.MIN_VALUE;
 		for (int i = 0; i < N; i++) {
-			if (table[i][T] > result) {
-				result = table[i][T];
+			if (table[i][0] > result) {
+				result = table[i][0];
 			}
 		}
 
 		return Math.log(result) + scaleupCount * Math.log(SCALEUP_FACTOR);
+
 	}
+
 }
