@@ -96,8 +96,8 @@ public class HMM {
 					return null;
 				}
 				if (i < stream.length() - 1) {
-					int nextState = hmm.findStateIndexOfSymbol(stream.charAt(i)
-							+ "");
+					int nextState = hmm.findStateIndexOfSymbol(stream
+							.charAt(i + 1) + "");
 					if (nextState < 0) {
 						System.err
 								.println("no next state found for an emission symbol");
@@ -162,7 +162,7 @@ public class HMM {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("vocabulary:\n");
-		sb.append(vocabulary);
+		sb.append(vocabulary + "\n");
 		sb.append("transition table: \n");
 		sb.append(arrayToString(a, N));
 		sb.append("emission table: \n");
