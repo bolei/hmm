@@ -24,9 +24,8 @@ public class BackwardAlgorithmHMMEvaluatorTest {
 		HMM hmm = new HMM(startState, finalState, transitionTable,
 				emissionTable, vocabulary);
 		System.out.println(hmm.toString());
-		BackwardAlgorithmHMMEvaluator backword = new BackwardAlgorithmHMMEvaluator(
-				hmm);
-		double actual = backword.evaluate(stream);
+		BackwardAlgorithmHMMEvaluator backword = new BackwardAlgorithmHMMEvaluator();
+		double actual = backword.evaluate(stream, hmm);
 		double expected = Math.log(0.032256);
 		System.out.println(actual);
 		System.out.println(Math.abs(actual - expected));

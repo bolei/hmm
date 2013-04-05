@@ -24,9 +24,8 @@ public class ForwardAlgorithmHMMEvaluatorTest {
 		HMM hmm = new HMM(startState, finalState, transitionTable,
 				emissionTable, vocabulary);
 		System.out.println(hmm.toString());
-		ForwardAlgorithmHMMEvaluator forward = new ForwardAlgorithmHMMEvaluator(
-				hmm);
-		double actual = forward.evaluate(stream);
+		ForwardAlgorithmHMMEvaluator forward = new ForwardAlgorithmHMMEvaluator();
+		double actual = forward.evaluate(stream, hmm);
 		double expected = Math.log(0.032256);
 		System.out.println(actual);
 		System.out.println(Math.abs(actual - expected));

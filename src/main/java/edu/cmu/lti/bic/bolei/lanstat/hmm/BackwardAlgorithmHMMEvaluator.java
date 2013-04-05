@@ -2,26 +2,15 @@ package edu.cmu.lti.bic.bolei.lanstat.hmm;
 
 public class BackwardAlgorithmHMMEvaluator extends AbstractHMMEvaluator {
 
-	BackwardAlgorithmHMMEvaluator(HMM hmm) {
-		super(hmm);
-	}
-
 	@Override
-	public double evaluate(String stream) {
-		// init table
-		if (stream.endsWith(HMM.END_OF_STREAM) == false) {
-			stream += HMM.END_OF_STREAM;
-		}
+	public StateObservationTable computeTable(HMM hmm, String stream) {
+		// backward algorithm
 		int N = hmm.getN();
 		int T = stream.length();
-
-		table = new double[N][T + 1];
-		int startState = hmm.getStartState();
+		double[][] table = new double[N][T + 1];
 		int finalState = hmm.getFinalState();
 		table[finalState][T] = 1;
-
-		// backward algorithm
-		int scaleupCount = 0;
+		int[] scaleupCount = new int[T + 1];
 		for (int t = T - 1; t >= 0; t--) {
 			for (int i = 0; i < N; i++) {
 				for (int j = 0; j < N; j++) {
@@ -31,13 +20,23 @@ public class BackwardAlgorithmHMMEvaluator extends AbstractHMMEvaluator {
 									.getSymbolIndex(stream.charAt(t) + "")];
 				}
 			}
-			scaleupCount += scaleUpTableColumn(t);
+			// scaleupCount += scaleUpTableColumn(table, t);
+			scaleupCount[t] = scaleupCount[t + 1]
+					+ scaleUpTableColumn(table, t);
 		}
 
-		double result = table[startState][0];
-		System.out.println(result + "\t" + scaleupCount);
-		return Math.log(result) - scaleupCount * Math.log(SCALEUP_FACTOR);
+		return new StateObservationTable(table, scaleupCount);
+	}
 
+	@Override
+	protected double getResult(StateObservationTable sotable, HMM hmm,
+			String stream) {
+		int startState = hmm.getStartState();
+		double tableResult = sotable.getTable()[startState][0];
+
+		System.out.println(tableResult + "\t" + sotable.getScaleupCount()[0]);
+		return Math.log(tableResult) - sotable.getScaleupCount()[0]
+				* Math.log(SCALEUP_FACTOR);
 	}
 
 }

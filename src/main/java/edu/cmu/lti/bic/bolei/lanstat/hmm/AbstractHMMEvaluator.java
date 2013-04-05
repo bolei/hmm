@@ -7,15 +7,19 @@ public abstract class AbstractHMMEvaluator {
 
 	protected static final int SCALEUP_FACTOR = 6;
 
-	protected HMM hmm;
-	protected double[][] table;
+	public double evaluate(String stream, HMM hmm) {
+		// init table
 
-	AbstractHMMEvaluator(HMM hmm) {
-		this.hmm = hmm;
+		if (stream.endsWith(HMM.END_OF_STREAM) == false) {
+			stream += HMM.END_OF_STREAM;
+		}
+		StateObservationTable sotable = computeTable(hmm, stream);
 
+		double result = getResult(sotable, hmm, stream);
+		return result;
 	}
 
-	public abstract double evaluate(String stream);
+	public abstract StateObservationTable computeTable(HMM hmm, String stream);
 
 	/**
 	 * Evaluate log(exp(left) + exp(right)) more accurately. log(exp(left) +
@@ -33,7 +37,7 @@ public abstract class AbstractHMMEvaluator {
 		}
 	}
 
-	protected int scaleUpTableColumn(int t) {
+	protected int scaleUpTableColumn(double[][] table, int t) {
 		double minPos = Double.MAX_VALUE;
 		for (int i = 0; i < table.length; i++) {
 			if (table[i][t] < minPos
@@ -56,4 +60,25 @@ public abstract class AbstractHMMEvaluator {
 		return x;
 	}
 
+	protected abstract double getResult(StateObservationTable sotable, HMM hmm,
+			String stream);
+
+	protected class StateObservationTable {
+		double[][] table;
+		int[] scaleupCount;
+
+		StateObservationTable(double[][] table, int[] scaleupCount) {
+			this.table = table;
+			this.scaleupCount = scaleupCount;
+		}
+
+		public double[][] getTable() {
+			return table;
+		}
+
+		public int[] getScaleupCount() {
+			return scaleupCount;
+		}
+
+	}
 }
