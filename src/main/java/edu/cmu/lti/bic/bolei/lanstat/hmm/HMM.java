@@ -4,8 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 public class HMM {
@@ -20,6 +21,7 @@ public class HMM {
 		}
 	}
 
+	public static final String END_OF_STREAM = "#";
 	private double[][] a; // transition table;
 	private double[][] b; // emission table
 
@@ -81,28 +83,33 @@ public class HMM {
 	 */
 	public static HMM create1stOrderSimpleHMM(String stream) {
 
+		if (stream.endsWith(END_OF_STREAM) == false) {
+			stream += END_OF_STREAM;
+		}
 		HMM hmm = new HMM();
 
-		LinkedList<HashSet<String>> stateSymbols = new LinkedList<HashSet<String>>();
+		HashMap<Integer, HashSet<String>> stateSymbols = new HashMap<Integer, HashSet<String>>();
 
-		// create states
-		hmm.N = Integer.parseInt(CONFIG.getProperty("stateNum"));
-		for (int i = 0; i < hmm.N; i++) {
+		// create states, plus start state and final state
+		hmm.N = Integer.parseInt(CONFIG.getProperty("stateNum")) + 2;
+		for (int i = 1; i <= hmm.N - 2; i++) {
 			HashSet<String> symbols = new HashSet<String>();
 			Collections.addAll(symbols, CONFIG.getProperty(i + "").split(","));
-			stateSymbols.add(symbols);
-			hmm.V += symbols.size();
+			stateSymbols.put(i, symbols);
 			hmm.vocabulary.addAll(symbols);
 		}
+		stateSymbols.put(
+				3,
+				new HashSet<String>(Arrays
+						.asList(new String[] { END_OF_STREAM })));
+		hmm.vocabulary.add(END_OF_STREAM);
 
+		hmm.V = hmm.vocabulary.size();
 		hmm.a = new double[hmm.N][hmm.N];
 		hmm.b = new double[hmm.N][hmm.V];
 
-		hmm.startState = findStateIndexOfSymbol(stateSymbols, stream.charAt(0)
-				+ "");
-
-		hmm.finalState = findStateIndexOfSymbol(stateSymbols,
-				stream.charAt(stream.length() - 1) + "");
+		hmm.startState = 0;
+		hmm.finalState = hmm.N - 1;
 
 		// build transitions
 		for (int i = 0; i < stream.length(); i++) {
@@ -112,6 +119,9 @@ public class HMM {
 				System.err
 						.println("no current state found for an emission symbol");
 				return null;
+			}
+			if (i == 0) {
+				hmm.a[0][currentState] = 1;
 			}
 			if (i < stream.length() - 1) {
 				int nextState = findStateIndexOfSymbol(stateSymbols,
@@ -132,10 +142,10 @@ public class HMM {
 	}
 
 	private static int findStateIndexOfSymbol(
-			LinkedList<HashSet<String>> stateSymbols, String symbol) {
-		for (int i = 0; i < stateSymbols.size(); i++) {
-			if (stateSymbols.get(i).contains(symbol)) {
-				return i;
+			HashMap<Integer, HashSet<String>> stateSymbols, String symbol) {
+		for (Entry<Integer, HashSet<String>> entry : stateSymbols.entrySet()) {
+			if (entry.getValue().contains(symbol)) {
+				return entry.getKey();
 			}
 		}
 		return -1;
@@ -148,7 +158,9 @@ public class HMM {
 			for (int j = 0; j < columnNum; j++) {
 				rowTotal += table[i][j];
 			}
-
+			if (rowTotal == 0) {
+				continue;
+			}
 			for (int j = 0; j < columnNum; j++) {
 				table[i][j] /= (double) rowTotal;
 			}
@@ -169,6 +181,8 @@ public class HMM {
 
 		sb.append("vocabulary:\n");
 		sb.append(vocabulary + "\n");
+		sb.append("V=" + V + "\n");
+		sb.append("N=" + N + "\n");
 		sb.append("transition table: \n");
 		sb.append(arrayToString(a, N));
 		sb.append("emission table: \n");

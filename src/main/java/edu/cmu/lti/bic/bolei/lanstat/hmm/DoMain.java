@@ -17,7 +17,7 @@ public class DoMain {
 							.getProperty("inputcorpus"))));
 			String stream = brIn.readLine();
 			HMM hmm = HMM.create1stOrderSimpleHMM(stream);
-			// System.out.println(hmm.toString());
+			System.out.println(hmm.toString());
 
 			AbstractHMMEvaluator evaluator = new ForwardAlgorithmHMMEvaluator(
 					hmm);

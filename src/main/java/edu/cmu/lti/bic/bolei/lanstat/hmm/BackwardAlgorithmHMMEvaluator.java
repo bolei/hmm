@@ -8,13 +8,15 @@ public class BackwardAlgorithmHMMEvaluator extends AbstractHMMEvaluator {
 
 	@Override
 	public double evaluate(String stream) {
-
 		// init table
-
+		if (stream.endsWith(HMM.END_OF_STREAM) == false) {
+			stream += HMM.END_OF_STREAM;
+		}
 		int N = hmm.getN();
 		int T = stream.length();
 
 		table = new double[N][T + 1];
+		int startState = hmm.getStartState();
 		int finalState = hmm.getFinalState();
 		table[finalState][T] = 1;
 
@@ -28,22 +30,13 @@ public class BackwardAlgorithmHMMEvaluator extends AbstractHMMEvaluator {
 							* hmm.getEmissionTable()[j][hmm
 									.getSymbolIndex(stream.charAt(t) + "")];
 				}
-				if (table[i][t] < (1 / SCALEUP_FACTOR)) {
-					table[i][t] *= SCALEUP_FACTOR;
-					scaleupCount++;
-				}
 			}
+			scaleupCount += scaleUpTableColumn(t);
 		}
 
-		// find the best to return
-		double result = Double.MIN_VALUE;
-		for (int i = 0; i < N; i++) {
-			if (table[i][0] > result) {
-				result = table[i][0];
-			}
-		}
-
-		return Math.log(result) + scaleupCount * Math.log(SCALEUP_FACTOR);
+		double result = table[startState][0];
+		System.out.println(result + "\t" + scaleupCount);
+		return Math.log(result) - scaleupCount * Math.log(SCALEUP_FACTOR);
 
 	}
 

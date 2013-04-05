@@ -5,7 +5,7 @@ public abstract class AbstractHMMEvaluator {
 
 	private static final double M_LN2 = 0.69314718055994530942;
 
-	protected static final int SCALEUP_FACTOR = 1000000;
+	protected static final int SCALEUP_FACTOR = 6;
 
 	protected HMM hmm;
 	protected double[][] table;
@@ -32,4 +32,28 @@ public abstract class AbstractHMMEvaluator {
 			return left + M_LN2;
 		}
 	}
+
+	protected int scaleUpTableColumn(int t) {
+		double minPos = Double.MAX_VALUE;
+		for (int i = 0; i < table.length; i++) {
+			if (table[i][t] < minPos
+					&& table[i][t] * Math.pow(10, SCALEUP_FACTOR) > 0) {
+				minPos = table[i][t];
+			}
+		}
+		if (minPos == 0) {
+			return 0;
+		}
+		int x = (int) Math.ceil((Math.log10(minPos) / SCALEUP_FACTOR) * (-1)) - 1;
+		if (x <= 0) {
+			return 0;
+		}
+		for (int i = 0; i < table.length; i++) {
+			for (int j = 0; j < x; j++) {
+				table[i][t] *= Math.pow(10, SCALEUP_FACTOR);
+			}
+		}
+		return x;
+	}
+
 }
