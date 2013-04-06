@@ -1,25 +1,13 @@
 package edu.cmu.lti.bic.bolei.lanstat.hmm;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
-import java.util.Properties;
 
 public class HMM {
-	private static final Properties CONFIG = new Properties();
-
-	static {
-		try {
-			CONFIG.load(HMM.class
-					.getResourceAsStream("/config/state.emission.properties"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
 
 	public static final String END_OF_STREAM = "#";
 	private double[][] a; // transition table;
@@ -91,10 +79,12 @@ public class HMM {
 		HashMap<Integer, HashSet<String>> stateSymbols = new HashMap<Integer, HashSet<String>>();
 
 		// create states, plus start state and final state
-		hmm.N = Integer.parseInt(CONFIG.getProperty("stateNum")) + 2;
+		hmm.N = Integer.parseInt(HMMUtil.getConfiguration().getProperty(
+				"stateNum")) + 2;
 		for (int i = 1; i <= hmm.N - 2; i++) {
 			HashSet<String> symbols = new HashSet<String>();
-			Collections.addAll(symbols, CONFIG.getProperty(i + "").split(","));
+			Collections.addAll(symbols,
+					HMMUtil.getConfiguration().getProperty(i + "").split(","));
 			stateSymbols.put(i, symbols);
 			hmm.vocabulary.addAll(symbols);
 		}
@@ -167,14 +157,6 @@ public class HMM {
 		}
 	}
 
-	public static String arrayToString(double[][] table, int rowNum) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < rowNum; i++) {
-			sb.append(Arrays.toString(table[i]) + "\n");
-		}
-		return sb.toString();
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
@@ -184,9 +166,9 @@ public class HMM {
 		sb.append("V=" + V + "\n");
 		sb.append("N=" + N + "\n");
 		sb.append("transition table: \n");
-		sb.append(arrayToString(a, N));
+		sb.append(HMMUtil.get2dArrayString(a));
 		sb.append("emission table: \n");
-		sb.append(arrayToString(b, N));
+		sb.append(HMMUtil.get2dArrayString(b));
 		return sb.toString();
 	}
 

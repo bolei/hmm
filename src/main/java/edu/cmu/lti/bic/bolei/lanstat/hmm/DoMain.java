@@ -29,7 +29,7 @@ public class DoMain {
 			System.out.println("backward algorithm:");
 			System.out.println(backward.evaluate(stream, hmm));
 
-			new HMMTraniner().baumWelchReestimate(hmm, stream);
+			HMMTraniner.baumWelchReestimate(hmm, stream);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
