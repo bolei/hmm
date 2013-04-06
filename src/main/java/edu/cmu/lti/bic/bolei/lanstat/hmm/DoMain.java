@@ -19,13 +19,17 @@ public class DoMain {
 			HMM hmm = HMM.create1stOrderSimpleHMM(stream);
 			System.out.println(hmm.toString());
 
-			AbstractHMMEvaluator evaluator = new ForwardAlgorithmHMMEvaluator();
-			System.out.println("forward algorithm:");
-			System.out.println(evaluator.evaluate(stream, hmm));
+			// stream = "AM";
 
-			evaluator = new BackwardAlgorithmHMMEvaluator();
+			ForwardAlgorithmHMMEvaluator forward = new ForwardAlgorithmHMMEvaluator();
+			System.out.println("forward algorithm:");
+			System.out.println(forward.evaluate(stream, hmm));
+
+			BackwardAlgorithmHMMEvaluator backward = new BackwardAlgorithmHMMEvaluator();
 			System.out.println("backward algorithm:");
-			System.out.println(evaluator.evaluate(stream, hmm));
+			System.out.println(backward.evaluate(stream, hmm));
+
+			new HMMTraniner().baumWelchReestimate(hmm, stream);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {

@@ -22,7 +22,7 @@ public class BackwardAlgorithmHMMEvaluator extends AbstractHMMEvaluator {
 			}
 			// scaleupCount += scaleUpTableColumn(table, t);
 			scaleupCount[t] = scaleupCount[t + 1]
-					+ scaleUpTableColumn(table, t);
+					+ HMMUtil.scaleUpTableColumn(table, t, SCALEUP_FACTOR);
 		}
 
 		return new StateObservationTable(table, scaleupCount);
