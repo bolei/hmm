@@ -76,7 +76,9 @@ public class HMMTraniner {
 		int N = gamma[0].length;
 		double[] pi = new double[N];
 		for (int i = 0; i < N; i++) {
-			pi[i] = gamma[0][i];
+			pi[i] = gamma[0][i]
+					* Math.pow(10, 2 * AbstractHMMEvaluator.SCALEUP_FACTOR) > 1 ? gamma[0][i]
+					: 0;
 		}
 		return pi;
 	}
