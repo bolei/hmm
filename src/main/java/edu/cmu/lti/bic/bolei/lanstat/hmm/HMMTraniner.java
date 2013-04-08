@@ -6,7 +6,7 @@ public class HMMTraniner {
 
 	public static void baumWelchReestimate(HMM hmm, String stream) {
 
-		final double threshold = 0.001;
+		final double threshold = 0.01;
 
 		ForwardAlgorithmHMMEvaluator forward = new ForwardAlgorithmHMMEvaluator();
 		BackwardAlgorithmHMMEvaluator backward = new BackwardAlgorithmHMMEvaluator();
@@ -17,6 +17,9 @@ public class HMMTraniner {
 
 		do {
 			System.out.println("iteration: " + itCount);
+			// if (itCount % 50 == 1) {
+			// System.out.println(hmm.toString());
+			// }
 			StateObservationTable alpha = forward.computeTable(hmm, stream);
 			StateObservationTable beta = backward.computeTable(hmm, stream);
 
@@ -62,9 +65,20 @@ public class HMMTraniner {
 
 			hmm.setEmissionTable(getNextEmissionTable(expectJEmitK,
 					expectNumInJ));
+
+			hmm.setPi(getNextPi(gamma));
 			itCount++;
 		} while (true);
 
+	}
+
+	private static double[] getNextPi(double[][] gamma) {
+		int N = gamma[0].length;
+		double[] pi = new double[N];
+		for (int i = 0; i < N; i++) {
+			pi[i] = gamma[0][i];
+		}
+		return pi;
 	}
 
 	public static double[][] getNextTransitionTable(

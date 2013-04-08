@@ -54,6 +54,10 @@ public class HMM {
 		return pi;
 	}
 
+	public void setPi(double[] pi) {
+		this.pi = pi;
+	}
+
 	public double[] getEta() {
 		return eta;
 	}
