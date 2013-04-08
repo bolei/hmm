@@ -31,4 +31,13 @@ public class HMMUtilTest {
 		Assert.assertEquals(1.0d, sum);
 	}
 
+	@Test
+	public void testScaleUpTableColumn() {
+		double[][] table = { { Math.pow(10, 0) }, { Math.pow(10, 1) },
+				{ Math.pow(10, 1) }, { Math.pow(10, 1) },
+				{ Math.pow(10, 1) } };
+		int x = HMMUtil.scaleUpTableColumn(table, 0, 1);
+		HMMUtil.print2dArray(table);
+		Assert.assertEquals(0, x);
+	}
 }

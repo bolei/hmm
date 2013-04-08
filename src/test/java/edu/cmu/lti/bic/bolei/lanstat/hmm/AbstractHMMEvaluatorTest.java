@@ -23,4 +23,14 @@ public class AbstractHMMEvaluatorTest {
 		assertEquals(0, x);
 	}
 
+	@Test
+	public void testGetResult() {
+		double tableResult = 5.511459863609369E-6;
+		int scaleupCount = 70;
+
+		double result = Math.log10(tableResult) - scaleupCount * 6;
+		System.out.println(result);
+
+	}
+
 }

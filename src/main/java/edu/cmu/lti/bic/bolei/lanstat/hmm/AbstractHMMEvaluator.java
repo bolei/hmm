@@ -7,9 +7,6 @@ public abstract class AbstractHMMEvaluator {
 	public double evaluate(String stream, HMM hmm) {
 		// init table
 
-		if (stream.endsWith(HMM.END_OF_STREAM) == false) {
-			stream += HMM.END_OF_STREAM;
-		}
 		StateObservationTable sotable = computeTable(hmm, stream);
 		double result = getResult(sotable, hmm, stream);
 		return result;
@@ -17,8 +14,22 @@ public abstract class AbstractHMMEvaluator {
 
 	public abstract StateObservationTable computeTable(HMM hmm, String stream);
 
-	protected abstract double getResult(StateObservationTable sotable, HMM hmm,
-			String stream);
+	public double getResult(StateObservationTable sotable, HMM hmm,
+			String stream) {
+
+		TableProbResult tableProbResult = getTableProbResult(sotable, hmm,
+				stream);
+
+		double tableResult = tableProbResult.getTableProb();
+
+		int scaleupCount = tableProbResult.getScaleupCount();
+
+		System.out.println("prob:\t" + tableResult + "\t" + scaleupCount);
+		return Math.log10(tableResult) - scaleupCount * SCALEUP_FACTOR;
+	}
+
+	public abstract TableProbResult getTableProbResult(
+			StateObservationTable sotable, HMM hmm, String stream);
 
 	protected class StateObservationTable {
 		double[][] table;
@@ -36,6 +47,25 @@ public abstract class AbstractHMMEvaluator {
 		public int[] getScaleupCount() {
 			return scaleupCount;
 		}
+	}
+
+	protected class TableProbResult {
+		double tableProb;
+		int scaleupCount;
+
+		TableProbResult(double tableProb, int scaleupCount) {
+			this.tableProb = tableProb;
+			this.scaleupCount = scaleupCount;
+		}
+
+		public double getTableProb() {
+			return tableProb;
+		}
+
+		public int getScaleupCount() {
+			return scaleupCount;
+		}
+
 	}
 
 }

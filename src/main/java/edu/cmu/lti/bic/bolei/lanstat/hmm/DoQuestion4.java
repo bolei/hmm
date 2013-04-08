@@ -12,22 +12,22 @@ public class DoQuestion4 {
 
 		int stateCount = Integer.parseInt(HMMUtil.getConfiguration()
 				.getProperty("stateNum"));
-		int N = stateCount + 2;
-		int startState = 0;
-		int finalState = N - 1;
+		int N = stateCount;
 		ArrayList<String> vocabulary = new ArrayList<String>();
-		for (int i = 1; i <= stateCount; i++) {
+		for (int i = 0; i < stateCount; i++) {
 			Collections.addAll(vocabulary, HMMUtil.getConfiguration()
 					.getProperty(i + "").split(","));
 		}
-		vocabulary.add(HMM.END_OF_STREAM);
 		int V = vocabulary.size();
 
 		double[][] transitionTable = HMMUtil.generateRandomTransitionTable(N);
 		double[][] emissionTable = HMMUtil.generateRandomEmissionTable(N, V);
+		double[] pi = HMMUtil.generateConstantSumRandomArray(1, N);
+		double[] eta = HMMUtil.generateConstantSumRandomArray(1, N);
+		HMM hmm = new HMM(transitionTable, emissionTable, pi, eta, vocabulary);
 
-		HMM hmm = new HMM(startState, finalState, transitionTable,
-				emissionTable, vocabulary);
+		System.out.println("random init HMM:");
+		System.out.println(hmm.toString());
 
 		Properties config = new Properties();
 		BufferedReader brIn = null;

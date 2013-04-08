@@ -9,27 +9,26 @@ import java.util.Map.Entry;
 
 public class HMM {
 
-	public static final String END_OF_STREAM = "#";
+	// public static final String END_OF_STREAM = "#";
 	private double[][] a; // transition table;
 	private double[][] b; // emission table
+	private double[] pi; // initial state distribution
+	private double[] eta;
 
 	private int N; // number of states
 	private int V = 0; // size of vocabulary
-
-	private int startState;
-	private int finalState;
 
 	private ArrayList<String> vocabulary = new ArrayList<String>();
 
 	private HMM() {
 	}
 
-	public HMM(int startState, int finalState, double[][] transitionTable,
-			double[][] emissionTable, ArrayList<String> vocabulary) {
-		this.startState = startState;
-		this.finalState = finalState;
+	public HMM(double[][] transitionTable, double[][] emissionTable,
+			double[] pi, double[] eta, ArrayList<String> vocabulary) {
 		this.a = transitionTable;
 		this.b = emissionTable;
+		this.pi = pi;
+		this.eta = eta;
 		this.N = a.length;
 		this.V = vocabulary.size();
 		this.vocabulary = vocabulary;
@@ -51,12 +50,20 @@ public class HMM {
 		return V;
 	}
 
-	public int getStartState() {
-		return startState;
+	public double[] getPi() {
+		return pi;
 	}
 
-	public int getFinalState() {
-		return finalState;
+	public double[] getEta() {
+		return eta;
+	}
+
+	public void setTransitionTable(double[][] transitionTable) {
+		this.a = transitionTable;
+	}
+
+	public void setEmissionTable(double[][] emissionTable) {
+		this.b = emissionTable;
 	}
 
 	/**
@@ -71,35 +78,26 @@ public class HMM {
 	 */
 	public static HMM create1stOrderSimpleHMM(String stream) {
 
-		if (stream.endsWith(END_OF_STREAM) == false) {
-			stream += END_OF_STREAM;
-		}
 		HMM hmm = new HMM();
 
 		HashMap<Integer, HashSet<String>> stateSymbols = new HashMap<Integer, HashSet<String>>();
 
 		// create states, plus start state and final state
 		hmm.N = Integer.parseInt(HMMUtil.getConfiguration().getProperty(
-				"stateNum")) + 2;
-		for (int i = 1; i <= hmm.N - 2; i++) {
+				"stateNum"));
+		for (int i = 0; i < hmm.N; i++) {
 			HashSet<String> symbols = new HashSet<String>();
 			Collections.addAll(symbols,
 					HMMUtil.getConfiguration().getProperty(i + "").split(","));
 			stateSymbols.put(i, symbols);
 			hmm.vocabulary.addAll(symbols);
 		}
-		stateSymbols.put(
-				3,
-				new HashSet<String>(Arrays
-						.asList(new String[] { END_OF_STREAM })));
-		hmm.vocabulary.add(END_OF_STREAM);
 
 		hmm.V = hmm.vocabulary.size();
 		hmm.a = new double[hmm.N][hmm.N];
 		hmm.b = new double[hmm.N][hmm.V];
-
-		hmm.startState = 0;
-		hmm.finalState = hmm.N - 1;
+		hmm.pi = new double[hmm.N];
+		hmm.eta = new double[hmm.N];
 
 		// build transitions
 		for (int i = 0; i < stream.length(); i++) {
@@ -111,7 +109,7 @@ public class HMM {
 				return null;
 			}
 			if (i == 0) {
-				hmm.a[0][currentState] = 1;
+				hmm.pi[currentState] = 1;
 			}
 			if (i < stream.length() - 1) {
 				int nextState = findStateIndexOfSymbol(stateSymbols,
@@ -122,6 +120,8 @@ public class HMM {
 					return null;
 				}
 				hmm.a[currentState][nextState] += 1;
+			} else {
+				hmm.eta[currentState] = 1;
 			}
 			hmm.b[currentState][hmm.vocabulary.indexOf(stream.charAt(i) + "")] += 1;
 		}
@@ -169,6 +169,10 @@ public class HMM {
 		sb.append(HMMUtil.get2dArrayString(a));
 		sb.append("emission table: \n");
 		sb.append(HMMUtil.get2dArrayString(b));
+		sb.append("pi:\n");
+		sb.append(Arrays.toString(pi) + "\n");
+		sb.append("eta:\n");
+		sb.append(Arrays.toString(eta) + "\n");
 		return sb.toString();
 	}
 

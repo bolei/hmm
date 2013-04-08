@@ -10,10 +10,10 @@ public class DoMain {
 		Properties config = new Properties();
 		BufferedReader brIn = null;
 		try {
-			config.load(HMM.class
+			config.load(DoMain.class
 					.getResourceAsStream("/config/global.properties"));
 			brIn = new BufferedReader(new InputStreamReader(
-					HMM.class.getResourceAsStream(config
+					DoMain.class.getResourceAsStream(config
 							.getProperty("inputcorpus"))));
 			String stream = brIn.readLine();
 			HMM hmm = HMM.create1stOrderSimpleHMM(stream);
@@ -29,7 +29,7 @@ public class DoMain {
 			System.out.println("backward algorithm:");
 			System.out.println(backward.evaluate(stream, hmm));
 
-			HMMTraniner.baumWelchReestimate(hmm, stream);
+			// HMMTraniner.baumWelchReestimate(hmm, stream);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {

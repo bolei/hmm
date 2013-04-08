@@ -1,7 +1,8 @@
 package edu.cmu.lti.bic.bolei.lanstat.hmm;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Properties;
 import java.util.Random;
 
@@ -85,7 +86,7 @@ public class HMMUtil {
 		// for each row, elements are not uniform distributed.
 		// last element is always bigger
 		double[][] table = new double[N][N];
-		for (int i = 0; i < N - 1; i++) {
+		for (int i = 0; i < N; i++) {
 			table[i] = generateConstantSumRandomArray(1.0d, N);
 		}
 		return table;
@@ -93,15 +94,19 @@ public class HMMUtil {
 
 	public static double[][] generateRandomEmissionTable(int N, int V) {
 		double[][] table = new double[N][V];
-		for (int i = 1; i < N - 1; i++) {
-			table[i] = Arrays.copyOf(generateConstantSumRandomArray(1d, V - 1),
-					V);
+		for (int i = 0; i < N; i++) {
+			table[i] = generateConstantSumRandomArray(1d, V);
 		}
-		table[N - 1][V - 1] = 1;
 		return table;
 	}
 
-	private static double[] generateConstantSumRandomArray(double sum, int len) {
+	public static void print2dArrayColumn(double[][] table, int column) {
+		for (int i = 0; i < table.length; i++) {
+			System.out.println("=>" + table[i][column]);
+		}
+	}
+
+	public static double[] generateConstantSumRandomArray(double sum, int len) {
 		double[] array = new double[len];
 		Random rand = new Random();
 		for (int j = 0; j < len - 1; j++) {
@@ -111,4 +116,16 @@ public class HMMUtil {
 		array[len - 1] = sum;
 		return array;
 	}
+
+	public static HMM generateTestHMM() {
+		ArrayList<String> vocabulary = new ArrayList<String>();
+		Collections.addAll(vocabulary, new String[] { "A", "B" });
+		double[][] transitionTable = { { 0.6d, 0.4d }, { 0, 1 } };
+		double[][] emissionTable = { { 0.8d, 0.2d }, { 0.3d, 0.7d } };
+		double[] pi = { 0.6, 0.4 };
+		double[] eta = { 0, 1 };
+		HMM hmm = new HMM(transitionTable, emissionTable, pi, eta, vocabulary);
+		return hmm;
+	}
+
 }
