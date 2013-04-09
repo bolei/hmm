@@ -26,7 +26,7 @@ public class HMMTraniner {
 			oldLogLikelihood = newLogLikelihood;
 
 			newLogLikelihood = forward.getResult(alpha, hmm, stream);
-			System.out.println("new log likelihood:" + newLogLikelihood);
+			System.out.println("average log likelihood:" + newLogLikelihood);
 			if (Double.isNaN(newLogLikelihood)) {
 				System.out.println(hmm.toString());
 				throw new AssertionError("not a number");
