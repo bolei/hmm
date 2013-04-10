@@ -24,7 +24,7 @@ public abstract class AbstractHMMEvaluator {
 
 		int scaleupCount = tableProbResult.getScaleupCount();
 
-		System.out.println("prob:\t" + tableResult + "\t" + scaleupCount);
+		// System.out.println("prob:\t" + tableResult + "\t" + scaleupCount);
 		return (Math.log10(tableResult) - scaleupCount * SCALEUP_FACTOR)
 				/ (double) stream.length();
 	}

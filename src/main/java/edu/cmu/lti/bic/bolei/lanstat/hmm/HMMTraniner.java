@@ -6,7 +6,7 @@ public class HMMTraniner {
 
 	public static void baumWelchReestimate(HMM hmm, String stream) {
 
-		final double threshold = 0.01;
+		final double threshold = 0.0000001;
 
 		ForwardAlgorithmHMMEvaluator forward = new ForwardAlgorithmHMMEvaluator();
 		BackwardAlgorithmHMMEvaluator backward = new BackwardAlgorithmHMMEvaluator();
@@ -52,7 +52,7 @@ public class HMMTraniner {
 			// calculate xi
 
 			double[][][] xi = calculateXi(hmm, alpha, beta, stream);
-			double[][] gamma = calculateGamma(xi);
+			double[][] gamma = calculateGamma(alpha, beta);
 
 			double[] expectTranFromI = calculateExpectedNumTransitionFromStateI(gamma);
 			double[] expectNumInJ = calculateExepectedNumInStateJ(gamma);
@@ -116,7 +116,7 @@ public class HMMTraniner {
 			String stream) {
 		int N = hmm.getN();
 		int T = stream.length();
-		double[][][] xi = new double[T][N][N];
+		double[][][] xi = new double[T - 1][N][N];
 		for (int t = 0; t < T - 1; t++) {
 			double POLambda = 0;
 			for (int i = 0; i < N; i++) {
@@ -141,30 +141,39 @@ public class HMMTraniner {
 		}
 
 		// when t = T-1
-		double POLambda = 0;
-		for (int i = 0; i < N; i++) {
-			POLambda += alpha.getTable()[i][T - 1] * hmm.getEta()[i] * N;
-		}
-
-		for (int i = 0; i < N; i++) {
-			for (int j = 0; j < N; j++) {
-				xi[T - 1][i][j] = alpha.getTable()[i][T - 1] * hmm.getEta()[i]
-						/ POLambda;
-			}
-		}
+		// double POLambda = 0;
+		// for (int i = 0; i < N; i++) {
+		// // POLambda += alpha.getTable()[i][T - 1] * hmm.getEta()[i] * N;
+		// POLambda += alpha.getTable()[i][T - 1] * N;
+		// }
+		//
+		// for (int i = 0; i < N; i++) {
+		// for (int j = 0; j < N; j++) {
+		// // xi[T - 1][i][j] = alpha.getTable()[i][T - 1] *
+		// // hmm.getEta()[i]
+		// // / POLambda;
+		// xi[T - 1][i][j] = alpha.getTable()[i][T - 1] / POLambda;
+		// }
+		// }
 
 		return xi;
 	}
 
-	public static double[][] calculateGamma(double[][][] xi) {
-		int T = xi.length;
-		int N = xi[0].length;
+	public static double[][] calculateGamma(StateObservationTable alpha,
+			StateObservationTable beta) {
+		int T = alpha.getTable()[0].length;
+		int N = alpha.getTable().length;
 		double[][] gamma = new double[T][N];
+		double[] POLambdaT = new double[T];
 		for (int t = 0; t < T; t++) {
 			for (int i = 0; i < N; i++) {
-				for (int j = 0; j < N; j++) {
-					gamma[t][i] += xi[t][i][j];
-				}
+				POLambdaT[t] += alpha.getTable()[i][t] * beta.getTable()[i][t];
+			}
+		}
+		for (int t = 0; t < T - 1; t++) {
+			for (int i = 0; i < N; i++) {
+				gamma[t][i] = alpha.getTable()[i][t] * beta.getTable()[i][t]
+						/ POLambdaT[t];
 			}
 		}
 		return gamma;

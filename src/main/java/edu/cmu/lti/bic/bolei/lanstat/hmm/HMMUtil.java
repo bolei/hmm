@@ -123,8 +123,7 @@ public class HMMUtil {
 		double[][] transitionTable = { { 0.6d, 0.4d }, { 0, 1 } };
 		double[][] emissionTable = { { 0.8d, 0.2d }, { 0.3d, 0.7d } };
 		double[] pi = { 0.6, 0.4 };
-		double[] eta = { 0, 1 };
-		HMM hmm = new HMM(transitionTable, emissionTable, pi, eta, vocabulary);
+		HMM hmm = new HMM(transitionTable, emissionTable, pi, vocabulary);
 		return hmm;
 	}
 

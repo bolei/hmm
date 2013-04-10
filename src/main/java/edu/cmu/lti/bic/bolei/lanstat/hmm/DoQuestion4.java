@@ -23,8 +23,7 @@ public class DoQuestion4 {
 		double[][] transitionTable = HMMUtil.generateRandomTransitionTable(N);
 		double[][] emissionTable = HMMUtil.generateRandomEmissionTable(N, V);
 		double[] pi = HMMUtil.generateConstantSumRandomArray(1, N);
-		double[] eta = HMMUtil.generateConstantSumRandomArray(1, N);
-		HMM hmm = new HMM(transitionTable, emissionTable, pi, eta, vocabulary);
+		HMM hmm = new HMM(transitionTable, emissionTable, pi, vocabulary);
 
 		System.out.println("random init HMM:");
 		System.out.println(hmm.toString());

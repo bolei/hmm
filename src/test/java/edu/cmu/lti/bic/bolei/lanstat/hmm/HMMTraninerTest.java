@@ -12,13 +12,14 @@ public class HMMTraninerTest {
 
 	@Test
 	public void testCalculateXi() {
+		System.out.println("xi");
 		StateObservationTable alpha = new ForwardAlgorithmHMMEvaluator()
 				.computeTable(hmm, stream);
 		StateObservationTable beta = new BackwardAlgorithmHMMEvaluator()
 				.computeTable(hmm, stream);
 
 		double[][][] xi = HMMTraniner.calculateXi(hmm, alpha, beta, stream);
-		for (int t = 0; t < stream.length(); t++) {
+		for (int t = 0; t < stream.length() - 1; t++) {
 			System.out.println("t=" + t);
 			HMMUtil.print2dArray(xi[t]);
 		}
@@ -26,23 +27,23 @@ public class HMMTraninerTest {
 
 	@Test
 	public void testCalculateGamma() {
+		System.out.println("gamma!");
 		StateObservationTable alpha = new ForwardAlgorithmHMMEvaluator()
 				.computeTable(hmm, stream);
 		StateObservationTable beta = new BackwardAlgorithmHMMEvaluator()
 				.computeTable(hmm, stream);
-		double[][][] xi = HMMTraniner.calculateXi(hmm, alpha, beta, stream);
-		double[][] gamma = HMMTraniner.calculateGamma(xi);
+		double[][] gamma = HMMTraniner.calculateGamma(alpha, beta);
 		HMMUtil.print2dArray(gamma);
 	}
 
 	@Test
 	public void testCalculateExpectedNumEmissionKInStateJ() {
+		System.out.println("expectJEmitK");
 		StateObservationTable alpha = new ForwardAlgorithmHMMEvaluator()
 				.computeTable(hmm, stream);
 		StateObservationTable beta = new BackwardAlgorithmHMMEvaluator()
 				.computeTable(hmm, stream);
-		double[][][] xi = HMMTraniner.calculateXi(hmm, alpha, beta, stream);
-		double[][] gamma = HMMTraniner.calculateGamma(xi);
+		double[][] gamma = HMMTraniner.calculateGamma(alpha, beta);
 		double[][] expectJEmitK = HMMTraniner
 				.calculateExpectedNumEmissionKInStateJ(hmm, gamma, stream);
 		System.out.println("expectJEmitK:");
@@ -51,12 +52,12 @@ public class HMMTraninerTest {
 
 	@Test
 	public void testGetNextEmissionTable() {
+		System.out.println("nextEmissionTable");
 		StateObservationTable alpha = new ForwardAlgorithmHMMEvaluator()
 				.computeTable(hmm, stream);
 		StateObservationTable beta = new BackwardAlgorithmHMMEvaluator()
 				.computeTable(hmm, stream);
-		double[][][] xi = HMMTraniner.calculateXi(hmm, alpha, beta, stream);
-		double[][] gamma = HMMTraniner.calculateGamma(xi);
+		double[][] gamma = HMMTraniner.calculateGamma(alpha, beta);
 		double[][] expectJEmitK = HMMTraniner
 				.calculateExpectedNumEmissionKInStateJ(hmm, gamma, stream);
 		double[] expectNumInJ = HMMTraniner

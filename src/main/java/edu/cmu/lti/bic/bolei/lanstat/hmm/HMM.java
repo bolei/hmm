@@ -13,7 +13,6 @@ public class HMM {
 	private double[][] a; // transition table;
 	private double[][] b; // emission table
 	private double[] pi; // initial state distribution
-	private double[] eta;
 
 	private int N; // number of states
 	private int V = 0; // size of vocabulary
@@ -24,11 +23,10 @@ public class HMM {
 	}
 
 	public HMM(double[][] transitionTable, double[][] emissionTable,
-			double[] pi, double[] eta, ArrayList<String> vocabulary) {
+			double[] pi, ArrayList<String> vocabulary) {
 		this.a = transitionTable;
 		this.b = emissionTable;
 		this.pi = pi;
-		this.eta = eta;
 		this.N = a.length;
 		this.V = vocabulary.size();
 		this.vocabulary = vocabulary;
@@ -56,10 +54,6 @@ public class HMM {
 
 	public void setPi(double[] pi) {
 		this.pi = pi;
-	}
-
-	public double[] getEta() {
-		return eta;
 	}
 
 	public void setTransitionTable(double[][] transitionTable) {
@@ -101,7 +95,6 @@ public class HMM {
 		hmm.a = new double[hmm.N][hmm.N];
 		hmm.b = new double[hmm.N][hmm.V];
 		hmm.pi = new double[hmm.N];
-		hmm.eta = new double[hmm.N];
 
 		// build transitions
 		for (int i = 0; i < stream.length(); i++) {
@@ -124,8 +117,6 @@ public class HMM {
 					return null;
 				}
 				hmm.a[currentState][nextState] += 1;
-			} else {
-				hmm.eta[currentState] = 1;
 			}
 			hmm.b[currentState][hmm.vocabulary.indexOf(stream.charAt(i) + "")] += 1;
 		}
@@ -175,8 +166,6 @@ public class HMM {
 		sb.append(HMMUtil.get2dArrayString(b));
 		sb.append("pi:\n");
 		sb.append(Arrays.toString(pi) + "\n");
-		sb.append("eta:\n");
-		sb.append(Arrays.toString(eta) + "\n");
 		return sb.toString();
 	}
 

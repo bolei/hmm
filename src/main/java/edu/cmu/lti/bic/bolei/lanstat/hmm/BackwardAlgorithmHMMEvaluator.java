@@ -12,7 +12,7 @@ public class BackwardAlgorithmHMMEvaluator extends AbstractHMMEvaluator {
 
 		// when t= T-1
 		for (int i = 0; i < N; i++) {
-			table[i][T - 1] = hmm.getEta()[i];
+			table[i][T - 1] =1;
 		}
 		scaleupCount[T - 1] = HMMUtil.scaleUpTableColumn(table, T - 1,
 				SCALEUP_FACTOR);

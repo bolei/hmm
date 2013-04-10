@@ -38,7 +38,7 @@ public class ForwardAlgorithmHMMEvaluator extends AbstractHMMEvaluator {
 		int T = stream.length() - 1;
 		double tableProb = 0;
 		for (int i = 0; i < hmm.getN(); i++) {
-			tableProb += sotable.getTable()[i][T] * hmm.getEta()[i];
+			tableProb += sotable.getTable()[i][T];
 		}
 
 		int scaleupCount = sotable.getScaleupCount()[T];
