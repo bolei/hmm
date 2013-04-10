@@ -127,4 +127,17 @@ public class HMMUtil {
 		return hmm;
 	}
 
+	public static int findMaxValueIndexIn2dArrayColumn(double[][] array,
+			int column) {
+		double max = Double.MIN_VALUE;
+		int max_pos = 0;
+		for (int i = 0; i < array.length; i++) {
+			if (array[i][column] > max) {
+				max = array[i][column];
+				max_pos = i;
+			}
+		}
+		return max_pos;
+	}
+
 }

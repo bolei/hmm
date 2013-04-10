@@ -173,4 +173,8 @@ public class HMM {
 		return vocabulary.indexOf(symbol);
 	}
 
+	public String getSymbolByIndex(int i) {
+		return vocabulary.get(i);
+	}
+
 }
